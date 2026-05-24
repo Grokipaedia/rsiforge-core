@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSIForge Core</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>🔥 RSIForge Core</h1>
+
+        <p class="subtitle">
+            Minimal Bounded Self-Improving Runtime
+        </p>
+
+        <div class="panel">
+
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Enter input..."
+            />
+
+            <button onclick="runCycle()">
+                Execute Runtime Cycle
+            </button>
+
+        </div>
+
+        <div class="panel">
+
+            <h2>Runtime Output</h2>
+
+            <div id="runtimeOutput">
+
+                <p><strong>Status:</strong> idle</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
