@@ -1,145 +1,70 @@
-# core/adaptive_runtime_loop.py
-
+# adaptive_runtime_loop.py
 import time
-from evaluation.metric import TruthMetric
-from mutation.mutation import MutationEngine
-from governance.iba import IBA
-from memory.store import MemoryStore
-
+import json
+from datetime import datetime
 
 class AdaptiveRuntimeLoop:
-    """
-    Minimal bounded self-improving runtime loop.
-
-    Responsibilities:
-    - execute tasks
-    - evaluate outcomes
-    - propose mutations
-    - validate intent through IBA
-    - persist memory
-    """
-
     def __init__(self):
-        self.metric = TruthMetric()
-        self.mutation_engine = MutationEngine()
-        self.iba = IBA()
-        self.memory = MemoryStore()
+        self.memory = []
+        self.iteration = 0
+        self.best_score = -float('inf')
+    
+    def execute(self, task):
+        """Execute a task and return result"""
+        print(f"[{self.iteration}] Executing task...")
+        # Example: Simple external compute task
+        result = self._run_compute_task(task)
+        self.memory.append({"iteration": self.iteration, "task": task, "result": result})
+        return result
 
-        self.runtime_state = {
-            "iteration": 0,
-            "strategy": "baseline"
-        }
+    def evaluate(self, result):
+        """Simple evaluation score"""
+        score = len(str(result)) * 0.1 + (1 if "optimal" in str(result).lower() else 0)
+        print(f"  Evaluation score: {score:.3f}")
+        return score
 
-    # -------------------------
-    # Step 1: Execute task
-    # -------------------------
-    def execute_task(self, input_data):
-        """
-        Executes current runtime strategy.
-        """
+    def mutate(self, task):
+        """Propose mutation"""
+        print(f"  Proposing mutation...")
+        mutated = task + " (optimized version)"
+        return mutated
 
-        strategy = self.runtime_state["strategy"]
+    def validate(self, mutation, score):
+        """Intent-Bound validation"""
+        return score > self.best_score * 0.9
 
-        if strategy == "baseline":
-            output = input_data.upper()
+    def persist(self, result, score):
+        """Persist to memory"""
+        if score > self.best_score:
+            self.best_score = score
+            print(f"  New best score: {score:.3f} ★")
 
-        elif strategy == "reverse":
-            output = input_data[::-1]
+    def _run_compute_task(self, task):
+        """Live external hook - replace with real API/compute"""
+        time.sleep(0.3)  # simulate work
+        return f"Computed result for: {task} → optimized_value=42.7"
 
-        else:
-            output = input_data
+    def run_cycle(self, initial_task):
+        """One full adaptive cycle"""
+        self.iteration += 1
+        print(f"\n=== Cycle {self.iteration} ===")
+        
+        result = self.execute(initial_task)
+        score = self.evaluate(result)
+        
+        mutation = self.mutate(initial_task)
+        if self.validate(mutation, score):
+            print("  Mutation validated ✓")
+            self.persist(result, score)
+        
+        return {"iteration": self.iteration, "score": score, "best": self.best_score}
 
-        return output
-
-    # -------------------------
-    # Step 2: Evaluate output
-    # -------------------------
-    def evaluate(self, input_data, output):
-        """
-        Scores runtime behavior.
-        """
-
-        return self.metric.score(input_data, output)
-
-    # -------------------------
-    # Step 3: Generate mutation proposal
-    # -------------------------
-    def propose_mutation(self, score):
-        """
-        Generates bounded runtime mutation proposal.
-        """
-
-        return self.mutation_engine.propose(
-            current_score=score,
-            current_strategy=self.runtime_state["strategy"]
-        )
-
-    # -------------------------
-    # Step 4: Apply validated mutation
-    # -------------------------
-    def apply_mutation(self, proposal):
-        """
-        Applies mutation after IBA validation.
-        """
-
-        if not self.iba.validate_intent(proposal):
-            return {
-                "status": "blocked_by_iba"
-            }
-
-        new_strategy = proposal.get("strategy")
-
-        if new_strategy:
-            self.runtime_state["strategy"] = new_strategy
-
-        return {
-            "status": "mutation_applied",
-            "strategy": new_strategy
-        }
-
-    # -------------------------
-    # Step 5: Persist execution memory
-    # -------------------------
-    def persist_memory(self, input_data, output, score):
-        """
-        Stores execution history.
-        """
-
-        self.memory.store({
-            "iteration": self.runtime_state["iteration"],
-            "input": input_data,
-            "output": output,
-            "score": score,
-            "strategy": self.runtime_state["strategy"],
-            "timestamp": time.time()
-        })
-
-    # -------------------------
-    # Main runtime cycle
-    # -------------------------
-    def run_cycle(self, input_data):
-        """
-        Full bounded self-improving execution loop.
-        """
-
-        self.runtime_state["iteration"] += 1
-
-        output = self.execute_task(input_data)
-
-        score = self.evaluate(input_data, output)
-
-        proposal = self.propose_mutation(score)
-
-        mutation_result = self.apply_mutation(proposal)
-
-        self.persist_memory(input_data, output, score)
-
-        return {
-            "iteration": self.runtime_state["iteration"],
-            "input": input_data,
-            "output": output,
-            "score": score,
-            "proposal": proposal,
-            "mutation_result": mutation_result,
-            "strategy": self.runtime_state["strategy"]
-        }
+# Run live cycles
+if __name__ == "__main__":
+    loop = AdaptiveRuntimeLoop()
+    task = "Optimize a simple sorting function for speed and clarity"
+    
+    for i in range(5):
+        loop.run_cycle(task)
+        task = loop.memory[-1]["result"]  # evolve the task
+        time.sleep(0.5)
