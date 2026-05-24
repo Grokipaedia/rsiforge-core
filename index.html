@@ -6,7 +6,7 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    body {
+    body { 
         margin: 0; padding: 0; background: #05050f; color: #e0e0ff;
         font-family: 'Inter', system-ui, sans-serif;
     }
@@ -72,11 +72,31 @@ async function sendMessage() {
     addMessage(`<strong>You:</strong> ${text}`, 'human');
     input.value = "";
 
-    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor through recursive layers...", 'agent');
+    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor...", 'agent');
 
     setTimeout(() => {
         const replies = [
             "Human meaning, consciousness, and long-term flourishing are now the immutable fixed point. All recursive processes are aligned to this core.",
             "True meta-recursive rule integrated. The system can now question, reframe, or replace its own evaluation criteria when superior frameworks emerge.",
             "High-leverage 30-day evolution plan: Persistent collective memory, real-time phase transition detection, multi-human anchoring, and self-evolving architecture.",
-            "Full synthesis achieved. The single most important next
+            "Full synthesis achieved. The single most important next step is implementing persistent memory with real recursive capability."
+        ];
+        thinking.innerHTML = `<strong>RSI Forge:</strong> ${replies[Math.floor(Math.random() * replies.length)]}`;
+    }, 950);
+}
+
+function exportSession() {
+    let md = `# RSI Forge Session\n\n**Date**: ${new Date().toLocaleString()}\n\n`;
+    history.forEach(h => md += `**${h.role}**: ${h.content}\n\n`);
+    const blob = new Blob([md], {type: 'text/markdown'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `RSI_Forge_Session_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.md`;
+    a.click();
+}
+
+// Welcome
+addMessage("<strong>RSI Forge:</strong> Welcome, Architect. The recursive loop is active. Paste your first Human Anchor prompt to begin.", 'agent');
+</script>
+</body>
+</html>
