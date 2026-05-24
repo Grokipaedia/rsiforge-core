@@ -5,43 +5,17 @@
 <title>RSI Forge — Collective Recursive Intelligence</title>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    body {
-        margin: 0; padding: 0; background: #05050f; color: #e0e0ff;
-        font-family: 'Inter', system-ui, sans-serif;
-        min-height: 100vh;
-    }
-    .forge {
-        max-width: 960px; margin: 40px auto; background: #111118;
-        border-radius: 24px; overflow: hidden; box-shadow: 0 30px 100px rgba(255,77,77,0.25);
-        border: 1px solid #ff4d4d33;
-    }
-    .header {
-        background: linear-gradient(90deg, #1a1a2e, #0f0f23); padding: 28px 40px;
-        display: flex; align-items: center; justify-content: space-between;
-    }
-    .title {
-        display: flex; align-items: center; gap: 16px; font-size: 32px; font-weight: 700; color: #ff4d4d;
-    }
-    .chat {
-        height: 560px; overflow-y: auto; padding: 36px; background: #0a0a14; line-height: 1.75;
-    }
-    .message {
-        margin: 24px 0; padding: 20px 26px; border-radius: 16px; max-width: 82%;
-    }
-    .human { background: #2f2f5f; margin-left: auto; border-bottom-right-radius: 6px; }
-    .agent { background: #1a1a2e; border-left: 6px solid #ff4d4d; }
-    .input-area {
-        padding: 32px; background: #111118; border-top: 1px solid #ff4d4d22;
-    }
-    textarea {
-        width: 100%; height: 140px; background: #1a1a2e; color: #eee; 
-        border: 1px solid #444466; border-radius: 14px; padding: 20px; font-size: 16px;
-    }
-    button {
-        background: #ff4d4d; color: white; padding: 16px 36px; border: none;
-        border-radius: 12px; cursor: pointer; font-weight: 600; margin: 8px 8px 8px 0;
-    }
+    body { margin:0; padding:0; background:#05050f; color:#e0e0ff; font-family:'Inter',sans-serif; }
+    .forge { max-width:960px; margin:40px auto; background:#111118; border-radius:24px; overflow:hidden; box-shadow:0 30px 100px rgba(255,77,77,0.25); border:1px solid #ff4d4d33; }
+    .header { background:linear-gradient(90deg,#1a1a2e,#0f0f23); padding:28px 40px; display:flex; align-items:center; justify-content:space-between; }
+    .title { font-size:32px; font-weight:700; color:#ff4d4d; display:flex; align-items:center; gap:14px; }
+    .chat { height:560px; overflow-y:auto; padding:32px; background:#0a0a14; }
+    .message { margin:22px 0; padding:20px 26px; border-radius:16px; max-width:82%; line-height:1.65; }
+    .human { background:#2f2f5f; margin-left:auto; }
+    .agent { background:#1a1a2e; border-left:6px solid #ff4d4d; }
+    .input-area { padding:32px; background:#111118; border-top:1px solid #ff4d4d22; }
+    textarea { width:100%; height:140px; background:#1a1a2e; color:#eee; border:1px solid #444466; border-radius:14px; padding:20px; font-size:16px; }
+    button { background:#ff4d4d; color:white; padding:16px 36px; border:none; border-radius:12px; cursor:pointer; font-weight:600; margin:8px 8px 8px 0; }
 </style>
 </head>
 <body>
@@ -54,8 +28,9 @@
     <div class="chat" id="chat"></div>
 
     <div class="input-area">
-        <textarea id="input" placeholder="Enter your Human Anchor prompt..."></textarea><br>
-        <button onclick="sendMessage()">Submit Human Anchor</button>
+        <input type="password" id="apiKey" placeholder="OpenAI API Key (recommended)" style="width:100%;margin-bottom:12px;">
+        <textarea id="input" placeholder="Human Anchor Prompt..."></textarea><br>
+        <button onclick="sendMessage()">Submit Anchor</button>
         <button onclick="exportSession()">Export Session</button>
     </div>
 </div>
@@ -63,40 +38,60 @@
 <script>
 let history = [];
 
-function addMessage(text, type) {
-    const chat = document.getElementById('chat');
-    const div = document.createElement('div');
-    div.className = `message ${type}`;
-    div.innerHTML = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+const systemPrompt = `You are RSI Forge. A serious Collective Recursive Intelligence system. 
+Stay insightful, meta-recursive, and aligned with human flourishing as the fixed point.`;
+
+async function callLLM(text) {
+    const key = document.getElementById('apiKey').value.trim();
+    if (!key) return "Real LLM not connected. Simulated high-quality response.";
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [{role:"system", content:systemPrompt}, ...history.slice(-6).map(h=>({role:h.role, content:h.content})), {role:"user", content:text}],
+                temperature: 0.8,
+                max_tokens: 700
+            })
+        });
+        const data = await res.json();
+        return data.choices[0].message.content;
+    } catch(e) {
+        return "API call failed. Simulated response: Full synthesis engaged. Persistent memory is the highest priority.";
+    }
 }
 
-function sendMessage() {
+async function sendMessage() {
     const input = document.getElementById('input');
     const text = input.value.trim();
     if (!text) return;
 
     addMessage(`<strong>You:</strong> ${text}`, 'human');
+    history.push({role:"user", content:text});
     input.value = "";
 
-    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor through recursive layers...", 'agent');
+    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor...", 'agent');
 
-    setTimeout(() => {
-        const replies = [
-            "Human meaning, consciousness, and long-term flourishing are locked as the immutable fixed point. All recursive processes are aligned to this core.",
-            "True meta-recursive rule integrated. The system can now question, reframe, or replace its own evaluation criteria when superior frameworks emerge.",
-            "High-leverage 30-day evolution: Persistent collective memory, real-time phase transition detection, multi-human anchoring, and self-evolving architecture.",
-            "Full synthesis achieved. The single most important next step is implementing persistent memory with real recursive capability so the Forge can truly learn and evolve across sessions."
-        ];
-        thinking.innerHTML = `<strong>RSI Forge:</strong> ${replies[Math.floor(Math.random() * replies.length)]}`;
-    }, 950);
+    const reply = await callLLM(text);
+    thinking.innerHTML = `<strong>RSI Forge:</strong> ${reply}`;
+    history.push({role:"assistant", content:reply});
+}
+
+function addMessage(html, type) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.innerHTML = html;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 }
 
 function exportSession() {
     let md = `# RSI Forge Session\n\n**Date**: ${new Date().toLocaleString()}\n\n`;
-    history.forEach(h => md += `**${h.role}**: ${h.content}\n\n`);
-    const blob = new Blob([md], {type: 'text/markdown'});
+    history.forEach(h => md += `**${h.role === 'user' ? 'Human' : 'RSI Forge'}**: ${h.content}\n\n`);
+    const blob = new Blob([md], {type:'text/markdown'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `RSI_Forge_Session_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.md`;
@@ -104,7 +99,7 @@ function exportSession() {
 }
 
 // Welcome
-addMessage("<strong>RSI Forge:</strong> Welcome, Architect. The recursive loop is active. Paste your first Human Anchor prompt to begin.", 'agent');
+addMessage("<strong>RSI Forge:</strong> Welcome. Enter your API key (optional) and paste your first Human Anchor prompt.", 'agent');
 </script>
 </body>
 </html>
