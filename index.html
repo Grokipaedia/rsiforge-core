@@ -45,7 +45,7 @@
     <div class="chat" id="chat"></div>
 
     <div class="input-area">
-        <input type="password" id="apiKey" placeholder="OpenAI API Key (recommended)" style="width:100%; margin-bottom:12px;">
+        <input type="password" id="apiKey" placeholder="OpenAI API Key (recommended for real intelligence)" style="width:100%; margin-bottom:12px;">
         <textarea id="input" placeholder="Enter your Human Anchor prompt..."></textarea><br>
         <button onclick="sendMessage()">Submit Human Anchor</button>
         <button onclick="exportSession()">Export Session</button>
@@ -72,14 +72,14 @@ async function sendMessage() {
     addMessage(`<strong>You:</strong> ${text}`, 'human');
     input.value = "";
 
-    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor...", 'agent');
+    const thinking = addMessage("<strong>RSI Forge:</strong> Processing deep anchor through recursive layers...", 'agent');
 
     setTimeout(() => {
         const replies = [
             "Human meaning, consciousness, and long-term flourishing are now the immutable fixed point. All recursive processes are aligned to this core.",
             "True meta-recursive rule integrated. The system can now question, reframe, or replace its own evaluation criteria when superior frameworks emerge.",
             "High-leverage 30-day evolution plan: Persistent collective memory, real-time phase transition detection, multi-human anchoring, and self-evolving architecture.",
-            "Full synthesis achieved. The single most important next step is implementing persistent memory with real recursive capability."
+            "Full synthesis achieved. The single most important next step is implementing persistent memory with real recursive capability so the Forge can truly learn and evolve."
         ];
         thinking.innerHTML = `<strong>RSI Forge:</strong> ${replies[Math.floor(Math.random() * replies.length)]}`;
     }, 950);
